@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,13 +19,7 @@
 
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-      <script type="text/javascript" src="https://jeremyfagis.github.io/dropify/dist/js/dropify.min.js"></script>
 
-      <link rel="stylesheet" type="text/css" href="https://jeremyfagis.github.io/dropify/dist/css/dropify.min.css">
-  
 </head>
 
 <body id="page-top">
@@ -107,7 +100,7 @@
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <!-- <li class="nav-item active">
+            <li class="nav-item active">
                 <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true"
                     aria-controls="collapsePages">
                     <i class="fas fa-fw fa-folder"></i>
@@ -126,7 +119,7 @@
                         <a class="collapse-item active" href="blank.html">Blank Page</a>
                     </div>
                 </div>
-            </li> -->
+            </li>
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
@@ -365,157 +358,11 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-         
+
                     <!-- Page Heading -->
-                    <div class="col-md-10">
-                <div class="container pt-5">
-                    <h1 class="text-center">Upload Image and PDF</h1>
-                
+                    <h1 class="h3 mb-4 text-gray-800">Blank Page</h1>
 
-                    <form method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                        <div class="form-check form-switch">
-      <input class="form-check-input" type="checkbox" id="darkmode" name="darkmode" checked>
-      <div id="message">Plat du jour</div>
-
-<script>
-    $(document).ready(function(){
-        $("#darkmode").change(function() {
-            if(this.checked) {
-                $("#message").html("Plat du jour");
-            }else{
-                $("#message").html("Nouveau Plat");
-            }
-        });
-    });
-</script>
-
-
-      
-    </div>
-                            <div class="container" style="width:364px;">
-                            <input id="file" name="file" type="file" class="dropify" data-height="100" />
-                            </div>
- 
-                          </div>
-                        <input type="submit" class="btn btn-primary" name="submit" value="Process">
-                    </form>
                 </div>
-            </div>
-    </div>
-   
-    <?php
-require_once 'vendor/autoload.php';
-require_once 'vendor/setasign/fpdf/fpdf.php';
-
-const FILE_NAME_OUTPUT = "output.pdf";
-// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
-const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
-
-if(isset($_POST['submit'])) {
-    // get the file names
-
-    $file = $_FILES['file']['tmp_name'];
-    $file2 = $_FILES['file'];
-    $file_path2 = $file2['tmp_name'];
-
-    $file_type  = $_FILES['file']['type'];
-    $pdf_path = 'FouratAnaneCV.pdf';
-    echo $file_path2;
-
-
-    // if(in_array($file_type ,  FILE_TYPE_ACCEPTED)){
-        if (isset($_POST['darkmode']) ) {
-
-        if($file_type == 'application/pdf'){
-            // $pdf_path2 = $file;
-            $pdf = new \setasign\Fpdi\Fpdi();
-            $pdf_pages =  $pdf->setSourceFile($file);
-            if($pdf_pages == 1){
-
-                // $pdf_paths=[$file,$pdf_path];
-                // // $image_name = "pdf".rand(1,1000).".".pathinfo($_FILES['file']['name'],PATHINFO_EXTENSION);
-                // $image_name = "pdf".rand(1,1000).".jpg";
-                // $image_path = 'images/'.$image_name;
-                // //$output =exec('gswin64c -sDEVICE=jpeg -dNOPAUSE -dBATCH -dSAFER -dFirstPage=1 -dLastPage=1 -sOutputFile='.$image_path.' '.$pdf_path);
-                // $output = exec('gswin64c -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -dJPEGQ=100 -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile='.$image_path.' '.$pdf_path);
-                $pdf2 = new \setasign\Fpdi\Fpdi();
-
-                // unlink($pdf_path);
-                $pdf2->setSourceFile($file);     
-                $template = $pdf2->importPage(1);
-                $pdf2->AddPage();
-                $pdf2->useTemplate($template);
-
-                    $pageCount = $pdf2->setSourceFile($pdf_path);                echo $pageCount;
-
-                    
-
-                                        for ($pageNo = 2; $pageNo <= $pageCount; $pageNo++) {
-                        
-                        $template = $pdf2->importPage($pageNo);
-                        $pdf2->AddPage();
-                        $pdf2->useTemplate($template);
-                    }
-                
-                $pdf2->Output(FILE_NAME_OUTPUT, 'F');
-
-            }
-        }
-        else {
-        $image_name = "image".rand(1,1000).".".pathinfo($_FILES['file']['name'],PATHINFO_EXTENSION);
-        $image_path = 'images/'.$image_name;
-        
-        if(move_uploaded_file($file, $image_path)){
-            
-            // create the FPDI object
-            $pdf = new \setasign\Fpdi\Fpdi();
-      
-            // add the image as the first page
-            $pdf->AddPage();
-            $pdf->Image($image_path, 0, 0, $pdf->getPageWidth(), $pdf->getPageHeight(), str_replace('image/', '', $file_type ));
-            unlink($image_path);
-            // set the source PDF file
-            $pageCount = $pdf->setSourceFile($pdf_path);
-
-            // import pages starting from the second page
-            for ($pageNo = 2; $pageNo <= $pageCount; $pageNo++) {
-                $template = $pdf->importPage($pageNo);
-                $pdf->AddPage();
-                $pdf->useTemplate($template);
-            }
-            // output the new pdf
-            $pdf->Output(FILE_NAME_OUTPUT, 'F');
-        
-    }
-    else{
-            echo "Error moving image to the folder";
-        }
-    
-    }
-    }
-
-else {
-    echo"yess";
-    $pdf = new \setasign\Fpdi\Fpdi();
-    $pageCount = $pdf->setSourceFile($file_path);
-
-    // import pages starting from the second page
-    for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-        $template = $pdf->importPage($pageNo);
-        $pdf->AddPage();
-        $pdf->useTemplate($template);
-    }   
-     $pdf->Output(FILE_NAME_OUTPUT, 'F');
-}
-    // }
-    // else{
-    //     echo "Invalid file format";
-    // }
-
-}
-?>
-
                 <!-- /.container-fluid -->
 
             </div>
@@ -563,7 +410,11 @@ else {
     </div>
 
     <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
@@ -571,23 +422,3 @@ else {
 </body>
 
 </html>
-    <script> 
-$( document ).ready(function() {
-  $('.dropify').dropify();
-  });
-</script>
-<script>
-      document.querySelector("form").addEventListener("submit", function(event) {
-  event.preventDefault();
-  var checkbox = document.getElementById("darkmode");
-  if (checkbox.checked) {
-    alert("checked");
-    console.log("Checkbox is checked");
-    //submit form here or perform any other action
-  } else {
-    alert("not checked");
-
-    console.log("Checkbox is not checked");
-  }
-});
-      </script>
