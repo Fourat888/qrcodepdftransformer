@@ -1,4 +1,3 @@
-
 <?php
 
 require_once 'vendor/autoload.php';
@@ -9,7 +8,7 @@ const FILE_NAME_OUTPUT = "testpdf.pdf";
 // const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
 const FILE_TYPE_ACCEPTEDWITHPDF = ["image/jpeg", "image/png", "image/gif","application/pdf"];
-
+const MAXIMUM_SIZE_UPLOAD = 5485760;
 const NB_MAX_PAGES = 9;
 
 $supplat = false;
@@ -41,7 +40,7 @@ if(isset($_POST['submit'])) {
             $pdf = new \setasign\Fpdi\Fpdi();
             $pdf_pagestest =  $pdf->setSourceFile(FILE_NAME_OUTPUT);
             $x = $pdf_pagestest == NB_MAX_PAGES ? 2 : 1;
-            if($file_type == 'application/pdf' && $_FILES['file']['size'] < 5485760  ){
+            if($file_type == 'application/pdf' && $_FILES['file']['size'] < MAXIMUM_SIZE_UPLOAD  ){
             // FILE_NAME_OUTPUT2 = $file;
 try {
 
@@ -80,12 +79,12 @@ try {
           
         } 
         else 
-            echo "more than one page" ;
+            $error = "more than one page" ;
             }
               catch (Exception $e) {
                 // code to handle the exception
-                echo "An error occurred: " . $e->getMessage();
-                echo "error";
+                //echo "An error occurred: " . $e->getMessage();
+                //echo "error";
             }
         }
         else      if(in_array($file_type ,  FILE_TYPE_ACCEPTED))
@@ -116,20 +115,25 @@ try {
         
     }
     else{
-            echo "Error moving image to the folder";
+        $error =  "Error moving image to the folder";
         }
     
     } else     if (!in_array($file_type ,  FILE_TYPE_ACCEPTEDWITHPDF)){
-    echo "Format non supporté";
+        $error =  "Format non supporté";
     }
     else {
-    echo "Taille élevé";
+        $error =  "Taille élevé";
     }
 
 }
 
 
 else {
+        if($file_type == 'application/pdf' && $_FILES['file']['size'] < MAXIMUM_SIZE_UPLOAD  )
+        {
+
+
+
     // unlink($path);
 
     $file = $_FILES['file'];
@@ -138,13 +142,13 @@ else {
 
         // move the uploaded file to the defined path
         if (move_uploaded_file($file['tmp_name'], FILE_NAME_OUTPUT)) {
-            echo "The file was uploaded successfully.";
+            $error =  "The file was uploaded successfully.";
         } else {
-            echo "There was an error uploading the file.";
+            $error =  "There was an error uploading the file.";
         }
     }
     else 
-    echo "error from this";
+    $error =  "error from this";
 //     $pdf = new \setasign\Fpdi\Fpdi();
 // $pageCount = $pdf->setSourceFile($file);
 
@@ -162,6 +166,8 @@ else {
 // }
 
 // $pdf->Output("output2.pdf", 'F');
+        }
+        else $error =  "format non supporté";
 }
 
 $pdf = new \setasign\Fpdi\Fpdi();
@@ -321,6 +327,7 @@ if (isset($_POST['supprimer']) ) {
             <div class="container pt-5">
             <div style="text-align:center;">
                 <h1 >Scanner Qr Code</h1>
+                <!-- <h5> <?php echo $error ; ?> </h5> -->
 
                     <img src="qrcode.png" width="15%" height="15%" />
             </div>
@@ -328,7 +335,7 @@ if (isset($_POST['supprimer']) ) {
                     <h1 class="text-center">Upload Image or PDF</h1>
                 
 
-                    <form method="post" action="" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data">
                         <div class="form-group">
                         <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" id="darkmode" name="darkmode" checked>
@@ -445,15 +452,4 @@ $( document ).ready(function() {
     console.log("Checkbox is not checked");
   }
 });
-      </script>
-          <!-- <script>
-    function showPDF() {
-  var checkbox = document.getElementById("displayPDF");
-  var pdf = document.getElementById("pdf-container");
-  if (checkbox.checked) {
-    pdf.style.display = "block";
-  } else {
-    pdf.style.display = "none";
-  }
-}
-    </script> -->
+</script>
