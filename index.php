@@ -21,10 +21,12 @@ const MAXIMUM_SIZE_UPLOAD = 15485760;
 $NB_MAX_PAGES = $user['pages'] ;
 $error='';
 $supplat = false;
+
 if (file_exists($FILE_NAME_OUTPUT)) {
-	
+  
 $pdf = new \setasign\Fpdi\Fpdi();
     $pdf_pagestest =  $pdf->setSourceFile($FILE_NAME_OUTPUT);
+
 if ($pdf_pagestest==$NB_MAX_PAGES) {
     $supplat = true;
 }
@@ -94,6 +96,7 @@ try {
             $error = "Ce pdf contient plus qu'une page pour un plat du jour" ;
             }
               catch (Exception $e) {
+                $error="la version du pdf que vous avez utilisé n'est pas compatible";
                 // code to handle the exception
                 //echo "An error occurred: " . $e->getMessage();
                 //echo "error";
@@ -141,8 +144,10 @@ try {
 
 
 else {
-  
-  if ($_FILES['file']['size'] > MAXIMUM_SIZE_UPLOAD && $file_type == 'application/pdf' )
+  try {
+  $pdf = new \setasign\Fpdi\Fpdi();
+ $pdf->setSourceFile($file);
+   if ($_FILES['file']['size'] > MAXIMUM_SIZE_UPLOAD && $file_type == 'application/pdf' )
   $error = "pdf très volumineux";
   else
         if($file_type == 'application/pdf' && $_FILES['file']['size'] < MAXIMUM_SIZE_UPLOAD )
@@ -166,25 +171,18 @@ else {
     }
     else 
     $error =  "pdf endommagé";
-//     $pdf = new \setasign\Fpdi\Fpdi();
-// $pageCount = $pdf->setSourceFile($file);
-
-// for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-//     $template = $pdf->importPage($pageNo);
-//     $pdf->AddPage('L', '', 0);
-//     $pdf->useTemplate($template);
-// }
-
-// $pageCount2 = $pdf->setSourceFile($FILE_NAME_OUTPUT);
-// for ($pageNo = 1; $pageNo <= $pageCount2; $pageNo++) {
-//     $template = $pdf->importPage($pageNo);
-//     $pdf->AddPage();
-//     $pdf->useTemplate($template);
-// }
-
-// $pdf->Output("output2.pdf", 'F');
         }
         else $error =  "Si vous voulez importer un nouveau menu complet, assurez vous qu'il s'agit d'un pdf";
+  }
+ catch (Exception $e) {
+  $error="la version du pdf que vous avez utilisé n'est pas compatible";
+  // code to handle the exception
+  //echo "An error occurred: " . $e->getMessage();
+  //echo "error";
+}
+
+
+
 }
 
 $pdf = new \setasign\Fpdi\Fpdi();
@@ -271,7 +269,7 @@ if (isset($_POST['supprimer']) ) {
         <hr class="sidebar-divider my-0">
         <!-- Nav Item - Dashboard -->
         <li class="nav-item">
-          <a class="nav-link" href="index.html">
+          <a class="nav-link" href="index.php">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Menu</span>
           </a>
@@ -282,7 +280,7 @@ if (isset($_POST['supprimer']) ) {
         <div class="sidebar-heading"> Interface </div>
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-          <a class="nav-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+        <a class="nav-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" href="settings.php">
             <i class="fas fa-fw fa-cog"></i>
             <span>Settings</span>
           </a>
@@ -290,11 +288,10 @@ if (isset($_POST['supprimer']) ) {
         
         <li class="nav-item">
           <a class="nav-link collapsed" href="logout.php" data-toggle="modal" data-target="#logoutModal" aria-expanded="true" aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-cog"></i>
+            <i class="fas fa-sign-out-alt"></i>
             <span>Se déconnecter</span>
           </a>
         </li>
-
         
         <!-- Nav Item - Utilities Collapse Menu -->
         <!-- Divider -->

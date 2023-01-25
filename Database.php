@@ -4,9 +4,9 @@ class Database {
     private $conn;
 
     private function __construct() {
-        $servername = "91.216.107.186";
-        $username = "fromq2035226";
-        $password = "Sadsad113@";
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
         $dbname = "fromq2035226";
         $error="";
         // Create connection
