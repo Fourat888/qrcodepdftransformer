@@ -167,7 +167,8 @@ else {
         // move the uploaded file to the defined path
         if (move_uploaded_file($file['tmp_name'], $FILE_NAME_OUTPUT)) {
             $error =  "Le pdf a été téléchargé avec succès.";
-			
+			$nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
+$supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
 
         } else {
             $error =  "Il y a eu une erreur lors du téléchargement du fichier.";
@@ -175,6 +176,8 @@ else {
     }
     else 
     $error =  "pdf endommagé";
+
+
         }
         else $error =  "Si vous voulez importer un nouveau menu complet, assurez vous qu'il s'agit d'un pdf";
   }
@@ -193,7 +196,7 @@ $pdf = new \setasign\Fpdi\Fpdi();
 
 
 $nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
-$supplat = $npages>=$NB_MAX_PAGES ? true : false ;
+$supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
 if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
   $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
 }
@@ -214,7 +217,7 @@ if (isset($_POST['supprimer']) ) {
         $pdf->Output($FILE_NAME_OUTPUT, 'F');
       }
 $nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
-$supplat = $npages>=$NB_MAX_PAGES ? true : false ;
+$supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
 if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
   $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
 }
@@ -450,7 +453,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
           <footer class="sticky-footer bg-white">
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
-                <span><?php echo $user['label'] ?>.</span>
+                <span><?php echo $user['label'] ?></span>
               </div>
             </div>
           </footer>
