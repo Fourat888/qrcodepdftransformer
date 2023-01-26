@@ -31,7 +31,9 @@ if ($pdf_pagestest==$NB_MAX_PAGES) {
     $supplat = true;
 }
 $supplat = $pdf->setSourceFile($FILE_NAME_OUTPUT)>=$NB_MAX_PAGES ?   true : false ;
-
+if (($pdf_pagestest!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$pdf_pagestest!=1)) {
+  $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
+}
 }
 ?>
 
@@ -165,6 +167,8 @@ else {
         // move the uploaded file to the defined path
         if (move_uploaded_file($file['tmp_name'], $FILE_NAME_OUTPUT)) {
             $error =  "Le pdf a été téléchargé avec succès.";
+			
+
         } else {
             $error =  "Il y a eu une erreur lors du téléchargement du fichier.";
         }
@@ -188,9 +192,11 @@ else {
 $pdf = new \setasign\Fpdi\Fpdi();
 
 
-
-$supplat = $pdf->setSourceFile($FILE_NAME_OUTPUT)>=$NB_MAX_PAGES ? true : false ;
-
+$nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
+$supplat = $npages>=$NB_MAX_PAGES ? true : false ;
+if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
+  $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
+}
 }
 if (isset($_POST['supprimer']) ) {
         $pdf = new \setasign\Fpdi\Fpdi();
@@ -207,8 +213,11 @@ if (isset($_POST['supprimer']) ) {
         
         $pdf->Output($FILE_NAME_OUTPUT, 'F');
       }
-	  $supplat = $pdf->setSourceFile($FILE_NAME_OUTPUT)>=$NB_MAX_PAGES ? true : false ;
-
+$nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
+$supplat = $npages>=$NB_MAX_PAGES ? true : false ;
+if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
+  $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
+}
         }
 
 ?>
@@ -345,7 +354,7 @@ if (isset($_POST['supprimer']) ) {
                             <div class="card position-relative">
                                 <div class="card-header py-3">
 								<?php if (file_exists($FILE_NAME_OUTPUT)) { ?>
-                                    <h6 class="m-0 font-weight-bold text-primary">Editer votre menu</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Editer votre menu (<?php echo $user['pages']?> pages y compris le plat du jour)</h6>
                                
 								<?php } else { ?>
 								<h6 class="m-0 font-weight-bold text-primary">Ajouter votre menu</h6>
@@ -368,15 +377,22 @@ if (isset($_POST['supprimer']) ) {
                         </div>
         
                       </div>
-                      <div class="mb-3">
+               
+                      <input type="submit" class="btn btn-primary" name="submit"  value="Envoyer"/>
+					  </br>
+					  </br>
+       <div class="mb-3">
     
     
-    <code <?php if ($error == "Le pdf a été téléchargé avec succès.") echo 'style="color:#1cc88a;"'; ?>>
+    <code <?php if ($error == "Le pdf a été téléchargé avec succès.") echo 'style="color:#1cc88a;"'; ?>
+ <?php if ($error == "Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ") {echo 'style="color:black;"';}?>    >            
         <?php echo $error ?? "" ; ?>
     </code>
-</div>
-                      <input type="submit" class="btn btn-primary" name="submit"  value="Envoyer"/>
+    <?php if ($error == "Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ") {?>                  
+    <a  href="settings.php ">ici</a>
+    <?php } ?>
 
+</div>
 
                       <div class="spinner-border text-success" style="display: none;" id="spinner" role="status" >
 
@@ -434,7 +450,7 @@ if (isset($_POST['supprimer']) ) {
           <footer class="sticky-footer bg-white">
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
-                <span><?php echo $user['label'] ?></span>
+                <span><?php echo $user['label'] ?>.</span>
               </div>
             </div>
           </footer>
