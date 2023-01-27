@@ -53,9 +53,7 @@ if (isset($_POST['pages'])) {
     <script type="text/javascript" src="lib/qrcode.min.js"></script>
     <script type="text/javascript" src="https://jeremyfagis.github.io/dropify/dist/js/dropify.min.js"></script>
 
-<style>
- 
-  </style>
+
     <link rel="stylesheet" href="lib/web/viewer.css">
 
 <!-- This snippet is used in production (included from viewer.html) -->

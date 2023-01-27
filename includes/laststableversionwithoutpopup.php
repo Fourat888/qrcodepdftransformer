@@ -13,7 +13,7 @@ require_once 'vendor/autoload.php';
 require_once 'vendor/setasign/fpdf/fpdf.php';
 require_once 'vendor/setasign/fpdi/src/autoload.php';
 
-$FILE_NAME_OUTPUT = '../docs/'.$user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
+ $FILE_NAME_OUTPUT = '../docs/'.$user['path'].'.pdf';
 // const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
 const FILE_TYPE_ACCEPTEDWITHPDF = ["image/jpeg", "image/png", "image/gif","application/pdf"];
@@ -46,9 +46,12 @@ if (isset($_REQUEST['submit']) && $_REQUEST['submit'] == true) {
   //  header("Refresh:0; url=".$_SERVER['PHP_SELF']);
 
     // get the file names
+    $pdf = new \setasign\Fpdi\Fpdi();
         $file = $_FILES['file']['tmp_name'];
             $file_type  = $_FILES['file']['type'];
+       
     // if(in_array($file_type ,  FILE_TYPE_ACCEPTED)){
+        if (isset($_POST['darkmode']) ) {
             // exec('gswin64c.exe -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=testpdf.pdf testpdf.pdf');
             $pdf = new \setasign\Fpdi\Fpdi();
             $pdf_pagestest =  $pdf->setSourceFile($FILE_NAME_OUTPUT);
@@ -63,7 +66,12 @@ try {
            
             if($pdf_pages == 1){
 
-
+                // $FILE_NAME_OUTPUTs=[$file,$FILE_NAME_OUTPUT];
+                // // $image_name = "pdf".rand(1,1000).".".pathinfo($_FILES['file']['name'],PATHINFO_EXTENSION);
+                // $image_name = "pdf".rand(1,1000).".jpg";
+                // $image_path = 'images/'.$image_name;
+                // //$output =exec('gswin64c -sDEVICE=jpeg -dNOPAUSE -dBATCH -dSAFER -dFirstPage=1 -dLastPage=1 -sOutputFile='.$image_path.' '.$FILE_NAME_OUTPUT);
+                // $output = exec('gswin64c -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -dJPEGQ=100 -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile='.$image_path.' '.$FILE_NAME_OUTPUT);
                 $pdf2 = new \setasign\Fpdi\Fpdi();
 
                 // unlink($FILE_NAME_OUTPUT);
@@ -84,10 +92,7 @@ try {
                     }
                 
                 $pdf2->Output($FILE_NAME_OUTPUT, 'F');
-
-                $pdf = new \setasign\Fpdi\Fpdi();
-                $nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
-                $supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
+          
         } 
         else 
             $error = "Ce pdf contient plus qu'une page pour un plat du jour" ;
@@ -124,8 +129,6 @@ try {
             }
             // output the new pdf
             $pdf->Output($FILE_NAME_OUTPUT, 'F');
-            $nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
-            $supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
         
     }
     else{
@@ -140,19 +143,19 @@ try {
     }
 
 }
-function submitsansetavecplat($FILE_NAME_OUTPUT,$x,$NB_MAX_PAGES,$conn,&$supplat)
-{
+
+
+else {
   try {
-    $file = $_FILES['file']['tmp_name'];
-    $file_type  = $_FILES['file']['type'];
+
    if ($_FILES['file']['size'] > MAXIMUM_SIZE_UPLOAD && $file_type == 'application/pdf' )
   $error = "pdf très volumineux";
   else
         if($file_type == 'application/pdf' && $_FILES['file']['size'] < MAXIMUM_SIZE_UPLOAD )
         
         {
-          $pdf = new \setasign\Fpdi\Fpdi();
-          $pdf->setSourceFile($file);
+  $pdf = new \setasign\Fpdi\Fpdi();
+ $pdf->setSourceFile($file);
 
 
     // unlink($path);
@@ -165,27 +168,8 @@ function submitsansetavecplat($FILE_NAME_OUTPUT,$x,$NB_MAX_PAGES,$conn,&$supplat
         if (move_uploaded_file($file['tmp_name'], $FILE_NAME_OUTPUT)) {
             $error =  "Le pdf a été téléchargé avec succès.";
 			$nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
-          
-$nb=4;
-$nbpagestouse=$nbpages+$x;
-$supplat = $nbpages===$nbpagestouse ? true : false ;
+$supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
 
-if ($nbpages < 25) {
-  $sql = "UPDATE client SET pages = :pages WHERE id = :id";
-  $stmt = $conn->prepare($sql);
-  $stmt->bindParam(':pages', $nbpagestouse);
-  $stmt->bindParam(':id', $user['id']);
-  $stmt->execute();
-  $user['id']=$nbpagestouse;
-  $_SESSION['user']['pages']=$nbpagestouse;
-  // Affichage d'un message de confirmation
-
-  // Fermeture de la connexion à la base de données
-  // $conn->close();
-
-} else {
-  $error= "Le nombre que vous avez saisi n'est pas valide. Veuillez entrer un nombre inférieur à 25.";
-}
         } else {
             $error =  "Il y a eu une erreur lors du téléchargement du fichier.";
         }
@@ -203,15 +187,20 @@ if ($nbpages < 25) {
   //echo "An error occurred: " . $e->getMessage();
   //echo "error";
 }
-}
-if (isset($_REQUEST['submitss']) && $_REQUEST['submitss'] == true) {
-   submitsansetavecplat($FILE_NAME_OUTPUT,1,$NB_MAX_PAGES,$conn,$supplat);
-}
-if (isset($_REQUEST['submitavec']) && $_REQUEST['submitavec'] == true) {
-  submitsansetavecplat($FILE_NAME_OUTPUT,0,$NB_MAX_PAGES,$conn,$supplat);
-}
 
 
+
+}
+
+$pdf = new \setasign\Fpdi\Fpdi();
+
+
+$nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
+$supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
+if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
+  $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
+}
+}
 if (isset($_POST['supprimer']) ) {
         $pdf = new \setasign\Fpdi\Fpdi();
         $pageCount = $pdf->setSourceFile($FILE_NAME_OUTPUT);
@@ -235,7 +224,13 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
         }
 
 ?>
-
+<style>
+  #qrcode {
+  display: flex;
+  justify-content: center; /* horizontally center the div */
+  align-items: center; /* vertically center the div */
+}
+  </style>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -249,8 +244,6 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <!-- Custom styles for this template-->
-    <link href="css/style.css" rel="stylesheet">
-
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -258,6 +251,9 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
     <script type="text/javascript" src="lib/qrcode.min.js"></script>
     <script type="text/javascript" src="https://jeremyfagis.github.io/dropify/dist/js/dropify.min.js"></script>
 
+<style>
+ 
+  </style>
     <link rel="stylesheet" href="lib/web/viewer.css">
 
 <!-- This snippet is used in production (included from viewer.html) -->
@@ -296,14 +292,14 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
         <div class="sidebar-heading"> Interface </div>
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-        <a class="nav-link collapsed"  href="settings.php">
+        <a class="nav-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" href="settings.php">
             <i class="fas fa-fw fa-cog"></i>
             <span>Settings</span>
           </a>
         </li>
         
         <li class="nav-item">
-          <a class="nav-link collapsed" href="logout.php"  >
+          <a class="nav-link collapsed" href="logout.php" data-toggle="modal" data-target="#logoutModal" aria-expanded="true" aria-controls="collapseTwo">
             <i class="fas fa-sign-out-alt"></i>
             <span>Se déconnecter</span>
           </a>
@@ -361,7 +357,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
                             <div class="card position-relative">
                                 <div class="card-header py-3">
 								<?php if (file_exists($FILE_NAME_OUTPUT)) { ?>
-                                    <h6 class="m-0 font-weight-bold text-primary">Editer votre menu </h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Editer votre menu (<?php echo $user['pages']?> pages y compris le plat du jour)</h6>
                                
 								<?php } else { ?>
 								<h6 class="m-0 font-weight-bold text-primary">Ajouter votre menu</h6>
@@ -380,34 +376,12 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
                          
                         </div>
                         <div class="container" style="width:100%">
-                          <input id="file" name="file" type="file" onchange="enableButton()" class="dropify" data-height="100" />
+                          <input id="file" name="file" type="file" class="dropify" data-height="100" />
                         </div>
         
                       </div>
-                      <div class="modalmodal-parent">
-
-<div id="myModal" class="modalmodal">
-
-  <!-- Modal content -->
-  <div class="modalmodal-contentmodal animatemodal">
-  <div class="modalbox">
-
-    <span class="close" onclick="hideModal()">&times;</span>
-    <p>Comment voulez-vous importer votre menu ?</p>
-<input type="submit"  name="submitavec"  onclick="yesOption()" value="Avec menu du jour"class="btn btn-primary" />
-<input type="submit"  name="submitss"  onclick="yesOption()" value="Sans menu du jour" class="btn btn-danger"   />
-                      <div class="spinner-border text-success" style="display: none;" id="spinner" role="status" >
-                      </div>
-
-  </div>
-  </div>
-
-</div>
-</div>
-
-                      <input type="submit"   name="submit"  class="btn btn-primary"   id="myBtn" value="Envoyer" disabled/>
-                      <input type="hidden" id="number_input" name="number" value="2">
-
+               
+                      <input type="submit" class="btn btn-primary" name="submit"  value="Envoyer"/>
 					  </br>
 					  </br>
        <div class="mb-3">
@@ -427,7 +401,6 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
 
 
 </div>
-
                     </form>
                     <form method="post" action="" enctype="multipart/form-data"> <?php 
                         if ($supplat){
@@ -477,9 +450,6 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
           </div>
           <!-- End of Main Content -->
           <!-- Footer -->
-
-<!-- The Modal -->
-
           <footer class="sticky-footer bg-white">
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
@@ -487,7 +457,24 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
               </div>
             </div>
           </footer>
-
+          <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
           <!-- End of Footer -->
           <!-- End of Content Wrapper -->
           <!-- End of Page Wrapper -->
@@ -504,7 +491,6 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
 
 
 <script>
-
   var x="Cliquer ou Glissez le plat du jour ou le menu complet";
    $(document).ready(function() {
     $('.dropify').dropify({
@@ -519,13 +505,11 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
                             $(document).ready(function() {
                               $("#darkmode").change(function() {
                                 if (this.checked) {
-                                
                                   $("#message").html("Plat du jour");
                                   x="Glissez le plat du jour ou cliquer22";
                                   
                                   
                                 } else {
-
                                   $("#message").html("Nouveau Menu");
                                   x="Glissez le nouveau menu ou cliquer";
                                 }
@@ -535,7 +519,12 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
     
                             });
                             
-                 </script>
+$( "input[name='submit']" ).click(function() {
+$( "input[name='submit']" ).hide();
+$( "#spinner" ).show();
+
+});
+                          </script>
                           <script type="text/javascript">
                               var path = <?php echo json_encode($user['path']); ?>;
                               var FRONT_HTTP = <?php echo json_encode(FRONT_HTTP); ?>;
@@ -547,72 +536,5 @@ var qrcode = new QRCode(document.getElementById("qrcode"), {
 });
 
 qrcode.makeCode(FRONT_HTTP+'/'+path);
-var modal = document.getElementById("myModal");
 
-// Get the button that opens the modal
-var btn = document.getElementById("myBtn");
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("closemodal")[0];
-const checkbox = document.getElementById("darkmode");
-var input  = document.getElementById("file");
-const file = input.files[0];
-function enableButton() {
-  var input  = document.getElementById("file");
-  var btn = document.getElementById("myBtn");
-
-if (input.files.length > 0) {
-  btn.disabled = false;
-  } else {
-    btn.disabled = true;
-  }
-}
-// When the user clicks the button, open the modal 
-btn.onclick = function() {
-  const file = input.files[0];
-
-  if (checkbox.checked) {
-    if (file==undefined){
-                                  alert ("Veuillez importer votre menu pdf");
-                                  
-                                  }
-    $( "#spinner" ).show();
-    btn.type = "submit";
-    btn.name = "submit";
-                                } else {
-                                  btn.type = "button";
-                                  btn.name = "button";
-                                  if (file==undefined){
-                                  alert ("Veuillez importer votre menu pdf");
-                                  }
-                                  else {
-                                  modal.style.display = "block";
-                                  }
-                                }
-
-                       
-    };
-    
-
-
-
-// When the user clicks on <span> (x), close the modal
-
-
-function hideModal() {
-  modal.style.display = "none";
-}
-function yesOption() {
-
-     $( "#spinner" ).show();
-
-}
-
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-}
 </script>
