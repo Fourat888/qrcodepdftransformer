@@ -13,7 +13,8 @@ require_once 'vendor/autoload.php';
 require_once 'vendor/setasign/fpdf/fpdf.php';
 require_once 'vendor/setasign/fpdi/src/autoload.php';
 
-$FILE_NAME_OUTPUT = '../docs/'.$user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
+$FILE_NAME_OUTPUT = $user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
+// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
 const FILE_TYPE_ACCEPTEDWITHPDF = ["image/jpeg", "image/png", "image/gif","application/pdf"];
 const MAXIMUM_SIZE_UPLOAD = 15485760;
@@ -167,7 +168,7 @@ function submitsansetavecplat($FILE_NAME_OUTPUT,$x,$NB_MAX_PAGES,$conn,&$supplat
           
 $nb=4;
 $nbpagestouse=$nbpages+$x;
-$supplat = $nbpages===77 ? true : false ;
+$supplat = $nbpages===$nbpagestouse ? true : false ;
 
 if ($nbpages < 25) {
   $sql = "UPDATE client SET pages = :pages WHERE id = :id";
@@ -295,7 +296,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
         <div class="sidebar-heading"> Interface </div>
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-        <a class="nav-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" href="settings.php">
+        <a class="nav-link collapsed"  href="settings.php">
             <i class="fas fa-fw fa-cog"></i>
             <span>Settings</span>
           </a>
@@ -360,7 +361,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
                             <div class="card position-relative">
                                 <div class="card-header py-3">
 								<?php if (file_exists($FILE_NAME_OUTPUT)) { ?>
-                                    <h6 class="m-0 font-weight-bold text-primary">Editer votre menu (<?php echo $_SESSION['user']['pages']?> pages y compris le plat du jour)</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Editer votre menu </h6>
                                
 								<?php } else { ?>
 								<h6 class="m-0 font-weight-bold text-primary">Ajouter votre menu</h6>
@@ -379,7 +380,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
                          
                         </div>
                         <div class="container" style="width:100%">
-                          <input id="file" name="file" type="file" class="dropify" data-height="100" />
+                          <input id="file" name="file" type="file" onchange="enableButton()" class="dropify" data-height="100" />
                         </div>
         
                       </div>
@@ -392,9 +393,9 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
   <div class="modalbox">
 
     <span class="close" onclick="hideModal()">&times;</span>
-    <p>Comment vous voulez importer votre pdf ?</p>
-<input type="submit"  name="submitavec"  onclick="yesOption()" value="Avec menu du jour"class="custom-red-btn"/>
-<input type="submit"  name="submitss"  onclick="yesOption()" value="Sans menu du jour" class="custom-blue-btn"/>
+    <p id="questionp">Comment voulez-vous importer votre menu ?</p>
+<input type="submit"  name="submitavec"  id ="btnavec" onclick="yesOption()" value="Avec menu du jour"class="btn btn-primary" />
+<input type="submit"  name="submitss"  id ="btnss" onclick="yesOption()" value="Sans menu du jour" class="btn btn-danger"   />
                       <div class="spinner-border text-success" style="display: none;" id="spinner" role="status" >
                       </div>
 
@@ -404,7 +405,8 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
 </div>
 </div>
 
-                      <input type="submit"   name="submit"  class="btn btn-primary"   id="myBtn" value="Envoyer" />
+                      <input type="submit"   name="submit"  class="btn btn-primary"   id="myBtn" value="Envoyer" disabled/>
+                      <div class="spinner-border text-success" style="display: none;" id="spinner2" role="status" ></div>
                       <input type="hidden" id="number_input" name="number" value="2">
 
 					  </br>
@@ -482,7 +484,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
           <footer class="sticky-footer bg-white">
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
-                <span><?php echo $user['label'] ?> .</span>
+                <span><?php echo $user['label'] ?></span>
               </div>
             </div>
           </footer>
@@ -555,22 +557,39 @@ var btn = document.getElementById("myBtn");
 var span = document.getElementsByClassName("closemodal")[0];
 const checkbox = document.getElementById("darkmode");
 var input  = document.getElementById("file");
+const file = input.files[0];
+function enableButton() {
+  var input  = document.getElementById("file");
+  var btn = document.getElementById("myBtn");
+  var btnavec = document.getElementById("btnavec");
+  var btnss = document.getElementById("btnss");
+ var questionp = document.getElementById("questionp");
+if (input.files.length > 0) {
+  btn.disabled = false;
+  } else {
+    btn.disabled = true;
+  }
+}
 
 // When the user clicks the button, open the modal 
 btn.onclick = function() {
   const file = input.files[0];
+
   if (checkbox.checked) {
     if (file==undefined){
-                                  alert ("pdf inexistent");
+                                  alert ("Veuillez importer votre menu pdf");
+                                  
                                   }
-    $( "#spinner" ).show();
+    $( "#spinner2" ).show();
     btn.type = "submit";
     btn.name = "submit";
+    btn.style.display = "none";
+
                                 } else {
                                   btn.type = "button";
                                   btn.name = "button";
                                   if (file==undefined){
-                                  alert ("pdf inexistent");
+                                  alert ("Veuillez importer votre menu pdf");
                                   }
                                   else {
                                   modal.style.display = "block";
@@ -590,7 +609,9 @@ function hideModal() {
   modal.style.display = "none";
 }
 function yesOption() {
-
+  btnavec.style.display = "none";
+  btnss.style.display = "none";
+  questionp.style.display = "none";
      $( "#spinner" ).show();
 
 }

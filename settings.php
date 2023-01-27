@@ -12,22 +12,35 @@ $user = $_SESSION['user'];
 
 ?>
 <?php
-$error='';
-if (isset($_POST['pages'])) {
-  if (is_numeric($_POST['pages']) && $_POST['pages'] < 25) {
-    $sql = "UPDATE client SET pages = :pages WHERE id = :id";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':pages', $_POST['pages']);
-    $stmt->bindParam(':id', $user['id']);
-    $stmt->execute();
-    $_SESSION['user']['pages']=$_POST['pages'];
+    $errors = array();
+    if (isset($_POST['client-label']) ) {
+    
+    $label = $_POST['client-label'];
+    $email = (isset($_POST['client-email'])) ? $_POST['client-email'] : null;
+    $valid = true;
+    if($label == null){
+      $valid = false;
+      $errors['label']= "Label ne peut pas etre vide";
+    }else if($email){
+      if (!preg_match("/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/", $email)) {
+          $valid = false;
+          $errors['email']= "Email format non valide";
+        }
+  }
+  if($valid){
+
+    $query = $conn->prepare("UPDATE client SET label = :label, email = :email WHERE id = :id AND id = :id");    
+    $query->bindParam(':label', $label);
+    $query->bindParam(':email', $email);
+    $query->bindParam(':id', $user['id']);
+    $query->execute();
+    $_SESSION['user']['label']=$_POST['client-label'];
+    $_SESSION['user']['email']=$_POST['client-email'];
     // Affichage d'un message de confirmation
 
     // Fermeture de la connexion à la base de données
     // $conn->close();
-    $error= "Le nombre de page maximales ont été mises à jour avec succès.";
-  } else {
-    $error= "Le nombre que vous avez saisi n'est pas valide. Veuillez entrer un nombre inférieur à 25.";
+    $errors['success'] = "Le contenu est bien changé";
   }
 }
 ?>
@@ -152,16 +165,29 @@ if (isset($_POST['pages'])) {
 <form class="upload-form" id="form" method="post" enctype="multipart/form-data">
 <div class="card mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Modifier le nombre de page maximale de votre pdf (y compris le plat du jour)</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Modifier le label et l'email</h6>
     </div>
     <div class="card-body">
-<input type="text" id="pages" name="pages" pattern="[0-9]+" max="25" value="<?php echo $_SESSION['user']['pages'] ?>"/>
-<input type="submit" class="btn btn-primary" name="submit"  value="Modifier"/>
+<div class="form-group">
+    <label for="client-label">New Label</label>
+    <input type="text" id="client-label" oninput="checkForm()" value="<?php echo $_SESSION['user']['label'] ?>" name="client-label" class="form-control"/>
+    <code>
+        <?php  echo $errors['label'] ?? "" ; ?>
+        </code>
+  </div>
+  <div class="form-group">
+    <label for="client-email">Email</label>
+    <input type="text" id="client-email" oninput="checkForm()" value="<?php echo $_SESSION['user']['email'] ?>" name="client-email" class="form-control"/>
+    <code>
+        <?php  echo $errors['email'] ?? "" ; ?>
+        </code>
+  </div><input type="submit" class="btn btn-primary" id="submit-button" name="submit"  value="Modifier" disabled/>
+
 
 </br>
-<code <?php if ($error == "Le nombre de page maximales ont été mises à jour avec succès.") echo 'style="color:#1cc88a;"'; ?>>
-        <?php echo $error ?? "" ; ?>
-    </code>
+<code <?php echo 'style="color:#1cc88a;"'; ?>>
+        <?php  echo $errors['success'] ?? "" ; ?>
+        </code>
 </div>
 </div>
 </form>
@@ -218,3 +244,19 @@ if (isset($_POST['pages'])) {
 </html>
 
 
+<script>
+//   document.getElementById("client-label").addEventListener("input", function() {
+//   document.getElementById("submit-button").disabled = false;
+// });
+function checkForm() {
+    var label = document.getElementById("client-label").value;
+    var email = document.getElementById("client-email").value;
+    var submitBtn = document.getElementById("submit-button");
+
+    if (label != "<?php echo $_SESSION['user']['label'] ?>" || email != "<?php echo $_SESSION['user']['email'] ?>") {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+}
+  </script>

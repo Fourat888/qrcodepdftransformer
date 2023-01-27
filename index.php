@@ -13,7 +13,7 @@ require_once 'vendor/autoload.php';
 require_once 'vendor/setasign/fpdf/fpdf.php';
 require_once 'vendor/setasign/fpdi/src/autoload.php';
 
-$FILE_NAME_OUTPUT = '../docs/'.$user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
+$FILE_NAME_OUTPUT = $user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 // const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
 const FILE_TYPE_ACCEPTEDWITHPDF = ["image/jpeg", "image/png", "image/gif","application/pdf"];
@@ -393,9 +393,9 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
   <div class="modalbox">
 
     <span class="close" onclick="hideModal()">&times;</span>
-    <p>Comment voulez-vous importer votre menu ?</p>
-<input type="submit"  name="submitavec"  onclick="yesOption()" value="Avec menu du jour"class="btn btn-primary" />
-<input type="submit"  name="submitss"  onclick="yesOption()" value="Sans menu du jour" class="btn btn-danger"   />
+    <p id="questionp">Comment voulez-vous importer votre menu ?</p>
+<input type="submit"  name="submitavec"  id ="btnavec" onclick="yesOption()" value="Avec menu du jour"class="btn btn-primary" />
+<input type="submit"  name="submitss"  id ="btnss" onclick="yesOption()" value="Sans menu du jour" class="btn btn-danger"   />
                       <div class="spinner-border text-success" style="display: none;" id="spinner" role="status" >
                       </div>
 
@@ -406,6 +406,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
 </div>
 
                       <input type="submit"   name="submit"  class="btn btn-primary"   id="myBtn" value="Envoyer" disabled/>
+                      <div class="spinner-border text-success" style="display: none;" id="spinner2" role="status" ></div>
                       <input type="hidden" id="number_input" name="number" value="2">
 
 					  </br>
@@ -560,13 +561,16 @@ const file = input.files[0];
 function enableButton() {
   var input  = document.getElementById("file");
   var btn = document.getElementById("myBtn");
-
+  var btnavec = document.getElementById("btnavec");
+  var btnss = document.getElementById("btnss");
+ var questionp = document.getElementById("questionp");
 if (input.files.length > 0) {
   btn.disabled = false;
   } else {
     btn.disabled = true;
   }
 }
+
 // When the user clicks the button, open the modal 
 btn.onclick = function() {
   const file = input.files[0];
@@ -576,9 +580,11 @@ btn.onclick = function() {
                                   alert ("Veuillez importer votre menu pdf");
                                   
                                   }
-    $( "#spinner" ).show();
+    $( "#spinner2" ).show();
     btn.type = "submit";
     btn.name = "submit";
+    btn.style.display = "none";
+
                                 } else {
                                   btn.type = "button";
                                   btn.name = "button";
@@ -603,7 +609,9 @@ function hideModal() {
   modal.style.display = "none";
 }
 function yesOption() {
-
+  btnavec.style.display = "none";
+  btnss.style.display = "none";
+  questionp.style.display = "none";
      $( "#spinner" ).show();
 
 }
