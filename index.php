@@ -13,12 +13,12 @@ require_once 'vendor/autoload.php';
 require_once 'vendor/setasign/fpdf/fpdf.php';
 require_once 'vendor/setasign/fpdi/src/autoload.php';
 
-$FILE_NAME_OUTPUT = $user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
+$FILE_NAME_OUTPUT = $user['path'].'.pdf' ;// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 // const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
 const FILE_TYPE_ACCEPTEDWITHPDF = ["image/jpeg", "image/png", "image/gif","application/pdf"];
 const MAXIMUM_SIZE_UPLOAD = 15485760;
-$NB_MAX_PAGES = $user['pages'] ;
+$NB_MAX_PAGES = $_SESSION['user']['pages'] ;
 $error='';
 $supplat = false;
 
@@ -43,6 +43,7 @@ if (($pdf_pagestest!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$pdf_pagestest!=1)) {
 //  echo ini_get('upload_max_filesize');
 
 if (isset($_REQUEST['submit']) && $_REQUEST['submit'] == true) {
+
   //  header("Refresh:0; url=".$_SERVER['PHP_SELF']);
 
     // get the file names
@@ -126,7 +127,8 @@ try {
             $pdf->Output($FILE_NAME_OUTPUT, 'F');
             $nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
             $supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
-        
+            $error =  "Plat du jour ajouté avec succès.";
+
     }
     else{
         $error =  "Erreur de transfert de l'image";
@@ -140,7 +142,7 @@ try {
     }
 
 }
-function submitsansetavecplat($FILE_NAME_OUTPUT,$x,$NB_MAX_PAGES,$conn,&$supplat)
+function submitsansetavecplat($FILE_NAME_OUTPUT,$x,$NB_MAX_PAGES,$conn,&$supplat,&$error)
 {
   try {
     $file = $_FILES['file']['tmp_name'];
@@ -174,9 +176,9 @@ if ($nbpages < 25) {
   $sql = "UPDATE client SET pages = :pages WHERE id = :id";
   $stmt = $conn->prepare($sql);
   $stmt->bindParam(':pages', $nbpagestouse);
-  $stmt->bindParam(':id', $user['id']);
+  $stmt->bindParam(':id', $_SESSION['user']['id']);
   $stmt->execute();
-  $user['id']=$nbpagestouse;
+
   $_SESSION['user']['pages']=$nbpagestouse;
   // Affichage d'un message de confirmation
 
@@ -205,10 +207,10 @@ if ($nbpages < 25) {
 }
 }
 if (isset($_REQUEST['submitss']) && $_REQUEST['submitss'] == true) {
-   submitsansetavecplat($FILE_NAME_OUTPUT,1,$NB_MAX_PAGES,$conn,$supplat);
+   submitsansetavecplat($FILE_NAME_OUTPUT,1,$NB_MAX_PAGES,$conn,$supplat,$error);
 }
 if (isset($_REQUEST['submitavec']) && $_REQUEST['submitavec'] == true) {
-  submitsansetavecplat($FILE_NAME_OUTPUT,0,$NB_MAX_PAGES,$conn,$supplat);
+  submitsansetavecplat($FILE_NAME_OUTPUT,0,$NB_MAX_PAGES,$conn,$supplat,$error);
 }
 
 
@@ -229,9 +231,7 @@ if (isset($_POST['supprimer']) ) {
       }
 $nbpages = $pdf->setSourceFile($FILE_NAME_OUTPUT);
 $supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
-if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
-  $error="Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ";
-}
+
         }
 
 ?>
@@ -374,7 +374,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
                                     <div class="small mb-1">
                                     <form class="upload-form" id="form1" method="post" enctype="multipart/form-data">
                       <div class="form-group">
-                        <div class="form-check form-switch <?php if (!file_exists($FILE_NAME_OUTPUT)) { ?> hidden <?php } ?>">
+                        <div class="form-check form-switch">
                           <input class="form-check-input" type="checkbox" id="darkmode" name="darkmode" <?php if (file_exists($FILE_NAME_OUTPUT)) { echo "checked"; }?>>
                           <div id="message">Plat du jour</div>
                          
@@ -405,7 +405,7 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
 </div>
 </div>
 
-                      <input type="submit"   name="submit"  class="btn btn-primary"   id="myBtn" value="Envoyer" disabled/>
+                      <input type="submit"   name="submit"  class="btn btn-primary"   onclick="testalert()" id="myBtn" value="Envoyer" disabled/>
                       <div class="spinner-border text-success" style="display: none;" id="spinner2" role="status" ></div>
                       <input type="hidden" id="number_input" name="number" value="2">
 
@@ -414,13 +414,10 @@ if (($nbpages!=$NB_MAX_PAGES)&&($NB_MAX_PAGES-$nbpages!=1)) {
        <div class="mb-3">
     
     
-    <code <?php if ($error == "Le pdf a été téléchargé avec succès.") echo 'style="color:#1cc88a;"'; ?>
- <?php if ($error == "Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ") {echo 'style="color:black;"';}?>    >            
-        <?php echo $error ?? "" ; ?>
+    <code <?php if (($error == "Le pdf a été téléchargé avec succès.")||($error == "Plat du jour ajouté avec succès.")) echo 'style="color:#1cc88a;"'; ?>>  
+          <?php echo $error ?? "" ; ?>
     </code>
-    <?php if ($error == "Le nombre de pages du PDF doit être égal ou supérieur à 1 au nombre maximal choisi. Pour changer la valeur maximale clicker ") {?>                  
-    <a  href="settings.php ">ici</a>
-    <?php } ?>
+    
 
 </div>
 
@@ -572,10 +569,15 @@ if (input.files.length > 0) {
 }
 
 // When the user clicks the button, open the modal 
-btn.onclick = function() {
+function testalert(){
   const file = input.files[0];
+  var_dump(input.files[0]);
+  alert('testtttt');
 
   if (checkbox.checked) {
+
+    alert('test');
+
     if (file==undefined){
                                   alert ("Veuillez importer votre menu pdf");
                                   
@@ -586,6 +588,8 @@ btn.onclick = function() {
     btn.style.display = "none";
 
                                 } else {
+                                  alert('test22');
+
                                   btn.type = "button";
                                   btn.name = "button";
                                   if (file==undefined){

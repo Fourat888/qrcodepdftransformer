@@ -29,11 +29,12 @@ $user = $_SESSION['user'];
   }
   if($valid){
 
-    $query = $conn->prepare("UPDATE client SET label = :label, email = :email WHERE id = :id AND id = :id");    
+    $query = $conn->prepare("UPDATE client SET label = :label, email = :email WHERE id = :id");    
     $query->bindParam(':label', $label);
     $query->bindParam(':email', $email);
     $query->bindParam(':id', $user['id']);
     $query->execute();
+
     $_SESSION['user']['label']=$_POST['client-label'];
     $_SESSION['user']['email']=$_POST['client-email'];
     // Affichage d'un message de confirmation
@@ -54,7 +55,7 @@ $user = $_SESSION['user'];
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title><?php echo $user['label'] ?></title>
+    <title><?php echo $_SESSION['user']['label'] ?></title>
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -88,7 +89,7 @@ $user = $_SESSION['user'];
           <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-laugh-wink"></i>
           </div>
-          <div class="sidebar-brand-text mx-1"><?php echo $user['label'] ?> </div>
+          <div class="sidebar-brand-text mx-1"><?php echo $_SESSION['user']['label'] ?> </div>
         </a>
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
@@ -207,7 +208,7 @@ $user = $_SESSION['user'];
           <footer class="sticky-footer bg-white">
             <div class="container my-auto">
               <div class="copyright text-center my-auto">
-                <span><?php echo $user['label'] ?></span>
+                <span><?php echo $_SESSION['user']['label'] ?></span>
               </div>
             </div>
           </footer>

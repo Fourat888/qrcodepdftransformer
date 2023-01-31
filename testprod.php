@@ -13,7 +13,7 @@ require_once 'vendor/autoload.php';
 require_once 'vendor/setasign/fpdf/fpdf.php';
 require_once 'vendor/setasign/fpdi/src/autoload.php';
 
-$FILE_NAME_OUTPUT = $user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
+$FILE_NAME_OUTPUT = '../docs/'.$user['path'].'.pdf';// const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 // const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
 const FILE_TYPE_ACCEPTED = ["image/jpeg", "image/png", "image/gif"];
 const FILE_TYPE_ACCEPTEDWITHPDF = ["image/jpeg", "image/png", "image/gif","application/pdf"];
