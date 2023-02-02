@@ -374,7 +374,7 @@ $supplat = $nbpages>=$NB_MAX_PAGES ? true : false ;
                                     <div class="small mb-1">
                                     <form class="upload-form" id="form1" method="post" enctype="multipart/form-data">
                       <div class="form-group">
-                        <div class="form-check form-switch" <?php if (!file_exists($FILE_NAME_OUTPUT)) { ?> hidden <?php } ?>>
+                        <div class="form-check form-switch">
                           <input class="form-check-input" type="checkbox" id="darkmode" name="darkmode" <?php if (file_exists($FILE_NAME_OUTPUT)) { echo "checked"; }?>>
                           <div id="message">Plat du jour</div>
                          
